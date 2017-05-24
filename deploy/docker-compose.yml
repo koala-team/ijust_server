@@ -1,0 +1,20 @@
+Mongo:
+  image: mongo
+  container_name: mongoc
+  volumes:
+    - /srv/docker/mongo/datadir:/data/db
+
+Redis:
+  image: redis
+  container_name: redisc
+
+IJust:
+  image: ijust
+  container_name: ijustc
+  links:
+    - Mongo
+    - Redis
+  volumes:
+    - /var/www/ijust:/var/www/ijust
+    - /tmp:/tmp
+    - /var/run/docker.sock:/var/run/docker.sock

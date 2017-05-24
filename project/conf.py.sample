@@ -1,0 +1,40 @@
+# -*- coding: utf-8 -*-
+# local config file
+__author__ = 'AminHP'
+
+# python imports
+import os
+
+
+# directory
+
+DATA_DIR = '/var/www/ijust/Data'
+
+TEMP_DIR = os.path.join(DATA_DIR, 'Temp')
+CACHE_DIR = os.path.join(TEMP_DIR, 'Cache')
+
+MEDIA_DIR = os.path.join(DATA_DIR, 'Media')
+PROBLEM_DIR = os.path.join(MEDIA_DIR, 'Problems')
+TESTCASE_DIR = os.path.join(MEDIA_DIR, 'Testcases')
+SUBMISSION_DIR = os.path.join(MEDIA_DIR, 'Submissions')
+
+
+# database
+
+REDIS_URL = "redis://Redis:6379/0"
+
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+
+MONGODB_SETTINGS = {
+    'db': 'ijust',
+    'host': 'Mongo',
+    'port': 27017
+}
+
+
+# captcha
+
+RECAPTCHA_ENABLED = True
+RECAPTCHA_SITE_KEY = "6LeDPwcTAAAAADVt4vp-kdTHXcbl76JbRFK3PUV5"
+RECAPTCHA_SECRET_KEY = "6LeDPwcTAAAAAKF5mXqJpKqo1NW2nntCrjyFwi3Q"
