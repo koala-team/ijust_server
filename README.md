@@ -41,7 +41,9 @@ With the use of *Docker* and *NGINX*, the script mentioned below deploys APIServ
 	$ sudo -i
     $ ./install.sh
 
-You can adjust your deployment configurations in the project/conf.py file.
+It is suggested that you reboot your system afterwards.
+
+You can also adjust your deployment configurations in the *project/conf.py* file.
 
 After running the above commands, if you add the following line of code to your *project/conf.py* file, you can view your errors' description:
 
@@ -53,7 +55,7 @@ Using [google reCAPTCHA admin](https://www.google.com/recaptcha/admin) you can u
     RECAPTCHA_SITE_KEY = "6LeDPwcTAAAAADVt4vp-kdTHXcbl76JbRFK3PUV5"
     RECAPTCHA_SECRET_KEY = "6LeDPwcTAAAAAKF5mXqJpKqo1NW2nntCrjyFwi3Q"
  
-For this project to work properly, you need to change our default domains (acm.iust.ac.ir, ijust.ir, www.ijust.ir) in the following files:
+For this project to work properly, you need to change our default domains ([acm.iust.ac.ir](https://acm.iust.ac.ir/), [ijust.ir](https://ijust.ir/), [www.ijust.ir](https://www.ijust.ir/)) in the following files:
 
 >install.sh
 >
