@@ -12,6 +12,7 @@ mkdir -p /var/www/ijust
 cd /var/www/ijust
 
 git clone https://github.com/k04la/ijust_server
+mv ijust_server server
 mkdir log
 touch reload
 
