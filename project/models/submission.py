@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
-__author__ = 'AminHP'
+from project.modules.admin.submission_view import SubmissionView
+
+__author__ = ['AminHP', 'SALAR']
 
 # python imports
 import os
 import shutil
-from enum import Enum
 
 # project imports
 from project import app
-from project.extensions import db
-from project.models.user import User
-from project.models.team import Team
-from project.models.contest import Contest, Problem, Result
+from project.extensions import db, admin
 from project.modules.datetime import utcnowts
 from project.modules.fields import IntEnumField
 from project.modules.ijudge.types import JudgementStatusType, ProgrammingLanguageType
@@ -58,29 +56,35 @@ class Submission(db.Document):
             self.filename
         )
 
-
     @classmethod
     def pre_delete(cls, sender, document, **kwargs):
         if os.path.exists(document.data_dir):
             shutil.rmtree(document.data_dir)
 
-
     def populate(self, json):
         self.filename = json['filename']
         self.prog_lang = json['prog_lang']
 
-
     def to_json(self):
         return dict(
-            id = str(self.pk),
-            filename = self.filename,
-            prog_lang = self.prog_lang.name,
-            submitted_at = self.submitted_at,
-            problem = self.problem.to_json_abs(),
-            user = self.user.to_json_abs(),
-            status = self.status.name,
-            reason = self.reason
+            id=str(self.pk),
+            filename=self.filename,
+            prog_lang=self.prog_lang.name,
+            submitted_at=self.submitted_at,
+            problem=self.problem.to_json_abs(),
+            user=self.user.to_json_abs(),
+            status=self.status.name,
+            reason=self.reason
+        )
+
+    def __unicode__(self):
+        return u"contest: {contest}, team: {team}, problem: {problem}, file:{filename} ".format(
+            contest=self.contest.name,
+            team=self.team.name,
+            problem=self.problem.title,
+            filename=self.filename
         )
 
 
 db.pre_delete.connect(Submission.pre_delete, sender=Submission)
+admin.add_view(SubmissionView(Submission))

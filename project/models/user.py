@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-__author__ = 'AminHP'
+__author__ = ['AminHP', 'SALAR']
 
 # python imports
 from passlib.apps import custom_app_context as pwd_context
 
 # project imports
-from project.extensions import db
+from project.extensions import db, admin
+from project.modules.admin.user_view import UserView
 
 
 class User(db.Document):
@@ -23,23 +24,19 @@ class User(db.Document):
         ]
     }
 
-
     def hash_password(self, password):
         password = password.encode('utf-8')
         self.password = pwd_context.encrypt(password)
 
-
     def verify_password(self, password):
         password = password.encode('utf-8')
         return pwd_context.verify(password, self.password)
-
 
     def change_password(self, old_password, new_password):
         if self.verify_password(old_password):
             self.hash_password(new_password)
             return True
         return False
-
 
     def populate(self, json):
         if 'username' in json:
@@ -51,19 +48,23 @@ class User(db.Document):
         if 'lastname' in json:
             self.lastname = json['lastname']
 
-
     def to_json(self):
         return dict(
-            id = str(self.pk),
-            username = self.username,
-            email = self.email,
-            firstname = self.firstname,
-            lastname = self.lastname
+            id=str(self.pk),
+            username=self.username,
+            email=self.email,
+            firstname=self.firstname,
+            lastname=self.lastname
         )
-
 
     def to_json_abs(self):
         return dict(
-            id = str(self.pk),
-            username = self.username
+            id=str(self.pk),
+            username=self.username
         )
+
+    def __unicode__(self):
+        return self.username
+
+
+admin.add_view(UserView(User))
