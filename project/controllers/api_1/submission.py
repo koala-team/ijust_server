@@ -5,7 +5,7 @@ __author__ = ['AminHP', 'SALAR']
 import os
 
 # flask imports
-from flask import jsonify, request, g, send_file, abort
+from flask import jsonify, g, send_file, abort
 
 # project imports
 from project import app
@@ -368,7 +368,7 @@ def check_code(obj, test):
         obj.problem.space_limit
     )
     obj.status = status
-    obj.reason = reason
+    obj.reason = reason.decode('utf-8', 'ignore')
     obj.save()
     if not test:
         update_contest_result(obj)
