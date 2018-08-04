@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__author__ = 'AminHP'
+__author__ = ['AminHP', 'SALAR']
 
 # python imports
 import os
@@ -109,9 +109,9 @@ def create():
                 return abort(406, "Contest has not started or has been finished")
 
         pending_submissions_num = Submission.objects(
-            contest = contest_obj,
-            team = team_obj if tid else None,
-            status = JudgementStatusType.Pending
+            contest=contest_obj,
+            team=team_obj if tid else None,
+            status=JudgementStatusType.Pending
         ).count()
         if pending_submissions_num >= len(contest_obj.problems):
             return abort(406, "You have too many pending submissions")
@@ -211,16 +211,19 @@ def list(cid, tid=None):
             contest_obj = Contest.objects.get(pk=cid)
             if (user_obj != contest_obj.owner) and (not user_obj in contest_obj.admins):
                 return abort(403, "You aren't owner or admin of the contest")
+            submissions = Submission.objects.filter(
+                contest=contest_obj,
+            ).order_by('-submitted_at')
+
         else:
             team_obj = Team.objects.get(pk=tid)
             contest_obj = Contest.objects.get(pk=cid, accepted_teams=team_obj)
             if not team_obj.is_user_in_team(user_obj):
                 return abort(403, "You aren't owner or member of the team")
-
-        submissions = Submission.objects.filter(
-            contest = contest_obj,
-            team = team_obj if tid else None
-        ).order_by('-submitted_at')
+            submissions = Submission.objects.filter(
+                contest=contest_obj,
+                team=team_obj if tid else None
+            ).order_by('-submitted_at')
 
         submissions = [s.to_json() for s in submissions]
         return jsonify(submissions=submissions), 200
@@ -290,9 +293,9 @@ def list_problem(cid, pid, tid=None):
                 return abort(403, "You aren't owner or member of the team")
 
         submissions = Submission.objects.filter(
-            contest = contest_obj,
-            problem = problem_obj,
-            team = team_obj if tid else None
+            contest=contest_obj,
+            problem=problem_obj,
+            team=team_obj if tid else None
         ).order_by('-submitted_at')
 
         submissions = [s.to_json() for s in submissions]
@@ -341,13 +344,13 @@ def download_code(sid):
             if (user_obj != obj.contest.owner) and (not user_obj in obj.contest.admins):
                 return abort(403, "You aren't owner or admin of the contest")
         else:
-            if not obj.team.is_user_in_team(user_obj):
+            if (not obj.team.is_user_in_team(user_obj)) and (user_obj != obj.contest.owner) and (
+            not user_obj in obj.contest.admins):
                 return abort(403, "You aren't owner or member of the team")
 
         return send_file(obj.code_path)
     except (db.DoesNotExist, db.ValidationError):
         return abort(404, "Submission does not exist")
-
 
 
 @celery.task()
