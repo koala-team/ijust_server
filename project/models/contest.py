@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-__author__ = 'AminHP'
+from project.modules.admin.contest_view import ContestView, ProblemView
+
+__author__ = ['AminHP', 'SALAR']
 
 # python imports
 import os
@@ -7,9 +9,8 @@ import shutil
 
 # project imports
 from project import app
-from project.extensions import db
+from project.extensions import db, admin
 from project.modules.datetime import utcnowts
-from project.models.user import User
 from project.models.team import Team
 
 
@@ -30,14 +31,12 @@ class Problem(db.Document):
     def testcase_dir(self):
         return os.path.join(app.config['TESTCASE_DIR'], str(self.pk))
 
-
     def delete(self, *args, **kwargs):
         if os.path.exists(self.body_path):
             os.remove(self.body_path)
         if os.path.exists(self.testcase_dir):
             shutil.rmtree(self.testcase_dir)
         super(Problem, self).delete(*args, **kwargs)
-
 
     def populate(self, json):
         if 'title' in json:
@@ -47,22 +46,24 @@ class Problem(db.Document):
         if 'space_limit' in json:
             self.space_limit = json['space_limit']
 
-
     def to_json(self):
         return dict(
-            id = str(self.pk),
-            title = self.title,
-            time_limit = self.time_limit,
-            space_limit = self.space_limit
+            id=str(self.pk),
+            title=self.title,
+            time_limit=self.time_limit,
+            space_limit=self.space_limit
         )
-
 
     def to_json_abs(self):
         return dict(
-            id = str(self.pk),
-            title = self.title
+            id=str(self.pk),
+            title=self.title
         )
 
+    def __unicode__(self):
+        return u"title: {title}".format(
+            title=self.title
+        )
 
 
 class Result(db.Document):
@@ -71,29 +72,27 @@ class Result(db.Document):
     last_time_result_changed = db.FloatField(default=0)
 
     default_team_data = dict(
-        problems = {},
-        solved_count = 0,
-        penalty = 0
+        problems={},
+        solved_count=0,
+        penalty=0
     )
 
     default_problem_data = dict(
-        submitted_at = None,
-        failed_tries = 0,
-        penalty = 0,
-        solved = False
+        submitted_at=None,
+        failed_tries=0,
+        penalty=0,
+        solved=False
     )
 
     meta = {
         'collection': 'results'
     }
 
-
     @staticmethod
     def _make_query_ids(tid, pid):
         tqid = "teams__%s" % tid
         pqid = "teams__%s__problems__%s" % (tid, pid)
         return tqid, pqid
-
 
     def _check_existence(self, tid, pid):
         tqid, pqid = self._make_query_ids(tid, pid)
@@ -114,7 +113,6 @@ class Result(db.Document):
             pqid: None
         }
         Result.objects(**find_query).update(**update_query)
-
 
     def _sort(self, last_time_result_changed):
 
@@ -150,7 +148,6 @@ class Result(db.Document):
         }
         Result.objects(**find_query).update(set__sorted_team_ids=sorted_team_ids)
 
-
     def update_failed_try(self, tid, pid, submitted_at, penalty=20):
         self._check_existence(tid, pid)
         tqid, pqid = self._make_query_ids(tid, pid)
@@ -165,7 +162,6 @@ class Result(db.Document):
             ("inc__%s__penalty" % pqid): penalty
         }
         Result.objects(**find_query).update(**update_query)
-
 
     def update_succeed_try(self, tid, pid, submitted_at, contest_starts_at):
         self._check_existence(tid, pid)
@@ -232,7 +228,6 @@ class Contest(db.Document):
         ]
     }
 
-
     @classmethod
     def post_save(cls, sender, document, **kwargs):
         if document.result:
@@ -242,25 +237,21 @@ class Contest(db.Document):
         document.result = result_obj
         document.save()
 
-
     @classmethod
     def pre_delete(cls, sender, document, **kwargs):
         if document.result:
             document.result.delete()
-
 
     def save(self):
         if not (self.created_at < self.starts_at < self.ends_at):
             raise ContestDateTimeError()
         super(Contest, self).save()
 
-
     def is_user_in_contest(self, user_obj):
         for team in self.accepted_teams:
             if team.is_user_in_team(user_obj):
                 return True
         return False
-
 
     def user_joining_status(self, user_obj):
         for team in self.accepted_teams:
@@ -271,7 +262,6 @@ class Contest(db.Document):
                 return 1, team
         return 0, None
 
-
     def populate(self, json):
         if 'name' in json:
             self.name = json['name']
@@ -280,21 +270,19 @@ class Contest(db.Document):
         if 'ends_at' in json:
             self.ends_at = json['ends_at']
 
-
     def to_json(self):
         return dict(
-            id = str(self.pk),
-            name = self.name,
-            owner = self.owner.to_json_abs(),
-            created_at = self.created_at,
-            starts_at = self.starts_at,
-            ends_at = self.ends_at,
-            is_active = True if self.starts_at <= utcnowts() <= self.ends_at else False,
-            is_ended = True if self.ends_at < utcnowts() else False,
-            pending_teams_num = len(self.pending_teams),
-            accepted_teams_num = len(self.accepted_teams)
+            id=str(self.pk),
+            name=self.name,
+            owner=self.owner.to_json_abs(),
+            created_at=self.created_at,
+            starts_at=self.starts_at,
+            ends_at=self.ends_at,
+            is_active=True if self.starts_at <= utcnowts() <= self.ends_at else False,
+            is_ended=True if self.ends_at < utcnowts() else False,
+            pending_teams_num=len(self.pending_teams),
+            accepted_teams_num=len(self.accepted_teams)
         )
-
 
     def to_json_user(self, user_obj):
         json = self.to_json()
@@ -307,34 +295,30 @@ class Contest(db.Document):
         json['is_admin'] = user_obj in self.admins
         return json
 
-
     def to_json_admins(self):
         return dict(
-            admins = [admin.to_json_abs() for admin in self.admins]
+            admins=[admin.to_json_abs() for admin in self.admins]
         )
-
 
     def to_json_teams(self, category):
         if category == 'pending':
             return dict(
-                pending_teams = [team.to_json() for team in self.pending_teams]
+                pending_teams=[team.to_json() for team in self.pending_teams]
             )
         elif category == 'accepted':
             return dict(
-                accepted_teams = [team.to_json() for team in self.accepted_teams]
+                accepted_teams=[team.to_json() for team in self.accepted_teams]
             )
         else:
             return dict(
-                pending_teams = [team.to_json() for team in self.pending_teams],
-                accepted_teams = [team.to_json() for team in self.accepted_teams]
+                pending_teams=[team.to_json() for team in self.pending_teams],
+                accepted_teams=[team.to_json() for team in self.accepted_teams]
             )
-
 
     def to_json_problems(self):
         return dict(
-            problems = [prob.to_json_abs() for prob in self.problems]
+            problems=[prob.to_json_abs() for prob in self.problems]
         )
-
 
     def to_json_result(self):
         sorted_teams = [Team.objects.get(pk=tid) for tid in self.result.sorted_team_ids]
@@ -345,15 +329,19 @@ class Contest(db.Document):
         all_teams = [dict(id=str(t.pk), name=t.name) for t in all_teams]
 
         return dict(
-            result = self.result.teams,
-            teams = all_teams,
-            problems = [p.to_json_abs() for p in self.problems]
+            result=self.result.teams,
+            teams=all_teams,
+            problems=[p.to_json_abs() for p in self.problems]
         )
+
+    def __unicode__(self):
+        return self.name
 
 
 db.post_save.connect(Contest.post_save, sender=Contest)
 db.pre_delete.connect(Contest.pre_delete, sender=Contest)
-
+admin.add_view(ContestView(Contest, category='Contest'))
+admin.add_view(ProblemView(Problem, category='Contest'))
 
 
 class ContestDateTimeError(db.ValidationError):

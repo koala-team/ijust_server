@@ -1,16 +1,19 @@
 Mongo:
   image: mongo
   container_name: mongoc
+  restart: always
   volumes:
     - /srv/docker/mongo/datadir:/data/db
 
 Redis:
   image: redis
+    restart: always
   container_name: redisc
 
 IJust:
   image: ijust
   container_name: ijustc
+  restart: always
   links:
     - Mongo
     - Redis

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-__author__ = 'AminHP'
+__author__ = ['AminHP', 'SALAR']
 
 # flask extentions
-from flask.ext.cache import Cache
-from flask.ext.celery import Celery
-from flask.ext.redis import FlaskRedis
-from flask.ext.mongoengine import MongoEngine
-from flask.ext.cors import CORS
+from flask_cache import Cache
+from flask_celery import Celery
+from flask_redis import FlaskRedis
+from flask_mongoengine import MongoEngine
+from flask_cors import CORS
+from flask_admin import Admin
 
 # project extentions
 from project.modules.schema_validator import Validator
@@ -26,3 +27,4 @@ api_router = ApiRouter()
 api_doc = ApiDoc()
 auth = Auth(redis)
 recaptcha = ReCaptcha()
+admin = Admin(template_mode='bootstrap3', url='/admin')

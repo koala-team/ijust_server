@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-__author__ = 'AminHP'
+from project.modules.admin.team_view import TeamView
+
+__author__ = ['AminHP', 'SALAR']
 
 # project imports
-from project.extensions import db
+from project.extensions import db, admin
 from project.models.user import User
 
 
@@ -20,7 +22,6 @@ class Team(db.Document):
         ]
     }
 
-
     @classmethod
     def teams(cls, user_obj):
         owner_teams = cls.objects.filter(owner=user_obj)
@@ -29,10 +30,8 @@ class Team(db.Document):
         member_teams = [t.to_json() for t in member_teams]
         return dict(owner_teams=owner_teams, member_teams=member_teams)
 
-
     def is_user_in_team(self, user_obj):
         return user_obj == self.owner or user_obj in self.members
-
 
     def populate(self, json):
         if 'name' in json:
@@ -41,19 +40,26 @@ class Team(db.Document):
             members = filter(lambda un: un != self.owner.username, json['members'])
             self.members = [User.objects.get(username=username) for username in members]
 
-
     def to_json(self):
         return dict(
-            id = str(self.pk),
-            name = self.name,
-            owner = self.owner.to_json_abs(),
-            members = [user.to_json_abs() for user in self.members]
+            id=str(self.pk),
+            name=self.name,
+            owner=self.owner.to_json_abs(),
+            members=[user.to_json_abs() for user in self.members]
         )
-
 
     def to_json_abs(self):
         return dict(
-            id = str(self.pk),
-            name = self.name,
-            owner = self.owner.to_json()
+            id=str(self.pk),
+            name=self.name,
+            owner=self.owner.to_json()
         )
+
+    def __unicode__(self):
+        return u"{name}({owner})".format(
+            name=self.name,
+            owner=self.owner.username
+        )
+
+
+admin.add_view(TeamView(Team))
