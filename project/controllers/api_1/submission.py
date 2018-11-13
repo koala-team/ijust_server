@@ -368,7 +368,9 @@ def check_code(obj, test):
         obj.problem.space_limit
     )
     obj.status = status
-    obj.reason = reason.decode('utf-8', 'ignore')
+    if reason:
+        reason = reason.decode('utf-8', 'ignore')
+    obj.reason = reason
     obj.save()
     if not test:
         update_contest_result(obj)
