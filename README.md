@@ -13,7 +13,11 @@ Implementation was done using *Python*, *Docker* and *Bash*.
     $ sudo apt-get install mongodb-server redis-server openssl libssl-dev curl libcurl4-nss-dev python-pip
     $ sudo pip install virtualenv
     $ sudo apt-get install docker docker.io docker-compose
-    $ docker build -f project/modules/ijudge/Dockerfile -t ijudge project/modules/ijudge/
+    $ docker pull salarn14/ijudge
+
+Or to `build` Ijudge image from source, instead of `docker pull` use this command:
+
+    $ docker build -f project/modules/ijudge/Dockerfile -t ijudge project/modules/ijudge/ 
 
 ### Running the Server
 
